@@ -37,7 +37,33 @@ export const updatePost = async (req, res) => {
 export const fetchPosts = async (req, res) => {
   const posts = await prisma.post.findMany({
     include: {
-      comment: true,
+      comment: {
+        select: {
+          comment: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+      },
+      _count: {
+        select: {
+          comment: true,
+        },
+      },
+    },
+    where: {
+      title: {
+        // startsWith: "a",
+        equals: "Post 1",
+      },
+      comment_count: {
+        gte: 1,
+      },
     },
   });
   return res.json({ status: 200, data: posts });
@@ -67,6 +93,9 @@ export const showPost = async (req, res) => {
         },
       },
     },
+    orderBy: {
+      id: "desc",
+    },
   });
   return res.json({ status: 200, data: post });
 };
@@ -79,4 +108,21 @@ export const deletePost = async (req, res) => {
     },
   });
   return res.json({ status: 200, message: "Post deleted" });
+};
+
+// searching
+
+export const searchPost = async (req, res) => {
+  const query = req.query.q;
+  const posts = await prisma.post.findMany({
+    where: {
+      description: {
+        search: query, // searches that includes query text
+      },
+    },
+  });
+  return res.json({
+    status: 200,
+    data: posts,
+  });
 };

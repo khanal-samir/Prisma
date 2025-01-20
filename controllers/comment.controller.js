@@ -52,11 +52,7 @@ export const fetchComments = async (req, res) => {
   const posts = await prisma.comment.findMany({
     select: {
       user: true,
-      post: {
-        select: {
-          user: true,
-        },
-      },
+      post: true,
     },
   });
   return res.json({ status: 200, data: posts });
