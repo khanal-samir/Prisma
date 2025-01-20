@@ -35,7 +35,11 @@ export const updatePost = async (req, res) => {
 };
 
 export const fetchPosts = async (req, res) => {
-  const posts = await prisma.post.findMany({});
+  const posts = await prisma.post.findMany({
+    include: {
+      comment: true,
+    },
+  });
   return res.json({ status: 200, data: posts });
 };
 
@@ -45,6 +49,23 @@ export const showPost = async (req, res) => {
     // or use findunique
     where: {
       id: Number(postId),
+    },
+    include: {
+      comment: {
+        select: {
+          comment: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          comment: true,
+        },
+      },
     },
   });
   return res.json({ status: 200, data: post });
